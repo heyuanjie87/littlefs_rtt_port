@@ -466,6 +466,8 @@ static int dfs_lfs_open(struct dfs_fd *file)
         else
         {
             file->data = (void *)dfs_lfs_fd;
+            file->pos = dfs_lfs_fd->u.file.pos;
+            file->size = dfs_lfs_fd->u.file.size;
 
             return RT_EOK;
         }
