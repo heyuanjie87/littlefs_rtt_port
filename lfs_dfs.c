@@ -10,6 +10,8 @@
 #include <dfs_file.h>
 #include "lfs.h"
 
+#include <rtdbg.h>
+
 #define RT_DFS_LFS_DRIVES 1
 #ifndef LFS_READ_SIZE
 #define LFS_READ_SIZE 128
@@ -187,7 +189,7 @@ static int dfs_lfs_mount(struct dfs_filesystem *dfs,
     /* Check Device Type */
     if (dfs->dev_id->type != RT_Device_Class_MTD)
     {
-        rt_kprintf("err: must be MTD!\n");
+        LOG_E("must be MTD!\n");
         return -EINVAL;
     }
     mtd = (rt_mtd_t *)dfs->dev_id;
@@ -196,7 +198,7 @@ static int dfs_lfs_mount(struct dfs_filesystem *dfs,
     dfs_lfs = rt_malloc(sizeof(dfs_lfs_t));
     if (dfs_lfs == RT_NULL)
     {
-        rt_kprintf("err: no memory!\n");
+        LOG_E("no memory!\n");
         return -ENOMEM;
     }
 
@@ -239,7 +241,7 @@ static int dfs_lfs_mkfs(rt_device_t dev_id)
     /* Check Device Type */
     if (dev_id->type != RT_Device_Class_MTD)
     {
-        rt_kprintf("err: must be MTD!\n");
+        LOG_E("must be MTD!\n");
         return -EINVAL;
     }
     mtd_nor = (rt_mtd_t *)dev_id;
@@ -247,7 +249,7 @@ static int dfs_lfs_mkfs(rt_device_t dev_id)
     dfs_lfs = rt_malloc(sizeof(dfs_lfs_t));
     if (!dfs_lfs)
     {
-        rt_kprintf("err: no memory!\n");
+        LOG_E("no memory!\n");
         return -ENOMEM;
     }
     rt_memset(dfs_lfs, 0, sizeof(dfs_lfs_t));
@@ -391,7 +393,7 @@ static int dfs_lfs_open(struct dfs_fd *file)
 
         if (dfs_lfs_fd == RT_NULL)
         {
-            rt_kprintf("err: no memory!\n");
+            LOG_E("no memory!\n");
 
             result = -ENOMEM;
             goto _error_dir;
@@ -469,7 +471,7 @@ static int dfs_lfs_open(struct dfs_fd *file)
             file->pos = dfs_lfs_fd->u.file.pos;
             file->size = dfs_lfs_fd->u.file.size;
 
-            return RT_EOK;
+            return 0;
         }
 
     _error_file:
