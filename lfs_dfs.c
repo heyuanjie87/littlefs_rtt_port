@@ -166,11 +166,12 @@ static void _dfs_lfs_load_config(dfs_lfs_t *dfs_lfs, rt_mtd_t *mtd_nor)
     }
 
     dfs_lfs->cfg.block_count = mtd_nor->size / mtd_nor->block_size;
-    dfs_lfs->cfg.lookahead = 32 * ((dfs_lfs->cfg.block_count + 31) / 32);
+    dfs_lfs->cfg.lookahead_size = 32 * ((dfs_lfs->cfg.block_count + 31) / 32);
+    dfs_lfs->cfg.block_cycles = 500;
 
-    if (dfs_lfs->cfg.lookahead > LFS_LOOKAHEAD)
+    if (dfs_lfs->cfg.lookahead_size > LFS_LOOKAHEAD)
     {
-        dfs_lfs->cfg.lookahead = LFS_LOOKAHEAD;
+        dfs_lfs->cfg.lookahead_size = LFS_LOOKAHEAD;
     }
 
     dfs_lfs->cfg.read = &_lfs_flash_read;
@@ -287,7 +288,7 @@ static int dfs_lfs_statfs(struct dfs_filesystem *dfs, struct statfs *buf)
 
     /* Get total sectors and free sectors */
 
-    result = lfs_traverse(&dfs_lfs->lfs, _dfs_lfs_statfs_count, &in_use);
+    result = lfs_fs_traverse(&dfs_lfs->lfs, _dfs_lfs_statfs_count, &in_use);
 
     if (result != LFS_ERR_OK)
     {
@@ -469,7 +470,7 @@ static int dfs_lfs_open(struct dfs_fd *file)
         {
             file->data = (void *)dfs_lfs_fd;
             file->pos = dfs_lfs_fd->u.file.pos;
-            file->size = dfs_lfs_fd->u.file.size;
+            file->size = lfs_file_size(dfs_lfs_fd->lfs, &dfs_lfs_fd->u.file);
 
             return 0;
         }
@@ -588,7 +589,7 @@ static int dfs_lfs_write(struct dfs_fd *file, const void *buf, size_t len)
 
     file->pos = dfs_lfs_fd->u.file.pos;
 
-    file->size = dfs_lfs_fd->u.file.size;
+    file->size = lfs_file_size(dfs_lfs_fd->lfs, &dfs_lfs_fd->u.file);
 
     return ssize;
 }
@@ -608,7 +609,7 @@ static int dfs_lfs_flush(struct dfs_fd *file)
     return lfs_result_to_dfs(result);
 }
 
-static int dfs_lfs_lseek(struct dfs_fd *file, rt_off_t offset)
+static int dfs_lfs_lseek(struct dfs_fd *file, off_t offset, int whence)
 {
     dfs_lfs_fd_t *dfs_lfs_fd;
 
