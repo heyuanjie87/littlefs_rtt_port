@@ -147,17 +147,7 @@ static void _dfs_lfs_load_config(dfs_lfs_t *dfs_lfs, rt_mtd_t *mtd_nor)
     dfs_lfs->cfg.context = (void *)mtd_nor;
 
     dfs_lfs->cfg.read_size = 1;
-
-    if (dfs_lfs->cfg.read_size < LFS_READ_SIZE)
-    {
-        dfs_lfs->cfg.read_size = LFS_READ_SIZE;
-    }
-
-    dfs_lfs->cfg.prog_size = 1;
-    if (dfs_lfs->cfg.prog_size < LFS_PROG_SIZE)
-    {
-        dfs_lfs->cfg.prog_size = LFS_PROG_SIZE;
-    }
+    dfs_lfs->cfg.prog_size = mtd_nor->sector_size;
 
     dfs_lfs->cfg.block_size = mtd_nor->block_size;
     if (dfs_lfs->cfg.block_size < LFS_BLOCK_SIZE)
@@ -168,6 +158,7 @@ static void _dfs_lfs_load_config(dfs_lfs_t *dfs_lfs, rt_mtd_t *mtd_nor)
     dfs_lfs->cfg.block_count = mtd_nor->size / mtd_nor->block_size;
     dfs_lfs->cfg.lookahead_size = 32 * ((dfs_lfs->cfg.block_count + 31) / 32);
     dfs_lfs->cfg.block_cycles = 500;
+    dfs_lfs->cfg.cache_size = 4;
 
     if (dfs_lfs->cfg.lookahead_size > LFS_LOOKAHEAD)
     {
