@@ -611,7 +611,9 @@ static int dfs_lfs_lseek(struct dfs_fd *file, off_t offset, int whence)
 
     if (file->type == FT_REGULAR)
     {
-        lfs_soff_t soff = lfs_file_seek(dfs_lfs_fd->lfs, &dfs_lfs_fd->u.file, offset, LFS_SEEK_SET);
+        lfs_soff_t soff;
+
+        soff = lfs_file_seek(dfs_lfs_fd->lfs, &dfs_lfs_fd->u.file, offset, whence);
 
         if (soff < 0)
         {
